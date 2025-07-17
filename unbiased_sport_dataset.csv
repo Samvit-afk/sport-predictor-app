@@ -1,0 +1,15 @@
+Age,Gender,Height_cm,Weight_kg,Endurance,Aggression,Team_Player,Sport
+22,1,190,83,10,2,1,Swimming
+25,1,178,78,9,8,0,Boxing
+19,0,165,52,8,3,0,Gymnastics
+21,0,168,56,9,4,1,Swimming
+28,1,175,85,7,7,1,Rugby
+24,1,172,68,10,2,0,Running
+26,0,160,62,6,5,1,Basketball
+30,1,180,70,9,3,0,Cycling
+23,0,158,60,7,4,1,Volleyball
+20,1,170,60,8,2,0,Tennis
+27,0,175,67,8,6,1,Hockey
+24,1,182,75,8,3,1,Swimming
+22,1,180,72,10,1,0,Rowing
+18,0,155,50,9,2,0,Badminton
