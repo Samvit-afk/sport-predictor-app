@@ -6,19 +6,65 @@ import os
 import json
 import matplotlib.pyplot as plt
 
-# Set up page config
+# --- Page Config ---
 st.set_page_config(page_title="Sport Recommendation App", layout="wide")
 
-# Load model
+# --- Custom CSS for UI ---
+st.markdown("""
+<style>
+/* Main background gradient */
+.stApp {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+}
+
+/* Sidebar panel background */
+section[data-testid="stSidebar"] {
+    background-color: #0091dd !important;
+    color: white;
+}
+
+/* Button Styling */
+div.stButton > button {
+    background-color: #1f8fff;
+    color: white;
+    border-radius: 10px;
+    padding: 0.6em 1.2em;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    transition: all 0.3s ease;
+}
+div.stButton > button:hover {
+    background-color: #00c6ff;
+    color: black;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: white;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# --- Typing Animation ---
+def typewriter_effect(text, speed=0.05):
+    placeholder = st.empty()
+    typed = ""
+    for char in text:
+        typed += char
+        placeholder.markdown(f"🏅 **{typed}**")
+        time.sleep(speed)
+
+# --- Load model ---
 model = joblib.load("sport_model.pkl")
 
-# Initialize session state
+# --- Session State ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# User DB setup
+# --- User DB ---
 user_db_file = "user_db.json"
 if not os.path.exists(user_db_file):
     with open(user_db_file, "w") as f:
@@ -26,7 +72,7 @@ if not os.path.exists(user_db_file):
 with open(user_db_file, "r") as f:
     user_db = json.load(f)
 
-# --- Sidebar Login/Register ---
+# --- Sidebar Auth ---
 with st.sidebar.expander("🔐 Login / Register (Optional)", expanded=False):
     option = st.radio("Select Option", ["Login", "Register"])
     username = st.text_input("Username")
@@ -54,7 +100,7 @@ if st.session_state.logged_in:
 else:
     st.sidebar.markdown("👤 Not logged in")
 
-# Navigation
+# --- Navigation ---
 page = st.sidebar.selectbox("Navigate", [
     "🏠 Home",
     "🎯 Predictor.AI",
@@ -64,7 +110,7 @@ page = st.sidebar.selectbox("Navigate", [
     "🥗 Diet Planner"
 ])
 
-# Page: Home
+# --- Pages ---
 if page == "🏠 Home":
     st.title("🏠 Welcome to the Sport Recommender")
     st.markdown("""
@@ -72,18 +118,14 @@ if page == "🏠 Home":
 
     **Features:**
     - AI-based Sport Recommendation
-    - BMI Calculator
-    - Endurance Estimator
-    - Aggression Level Check
+    - BMI Calculator with Tips & Chart
+    - Endurance & Aggression Check
     - Personalized Diet Planner
-
-    You can optionally log in to save personalized diet plans in the future.
     """)
 
-# Page: Predictor
 elif page == "🎯 Predictor.AI":
     st.title("🎯 Sport Predictor")
-    
+
     age = st.slider("Age", 10, 60, 25)
     gender = st.selectbox("Gender", ["Male", "Female"])
     height = st.number_input("Height (cm)", 100, 250, 170)
@@ -108,15 +150,14 @@ elif page == "🎯 Predictor.AI":
 
     if st.button("Predict Sport"):
         with st.spinner("Analyzing your profile..."):
-            time.sleep(2)
+            time.sleep(1.5)
             prediction = model.predict(input_df)
             sport = prediction[0]
-            st.success(f"🏅 Recommended Sport: **{sport}**")
-
+            st.success("🏅 Recommended Sport:")
+            typewriter_effect(sport, speed=0.05)
             if medical_condition:
-                st.warning("⚠️ Note: Please consult a physician before engaging in physical activities with your medical condition.")
+                st.warning("⚠️ Note: Consult a doctor before playing any sport with your medical condition.")
 
-# Page: BMI Calculator
 elif page == "📊 BMI Calculator":
     st.title("📊 BMI Calculator")
     height_cm = st.number_input("Enter your height (cm):", 100, 250, 170)
@@ -127,51 +168,19 @@ elif page == "📊 BMI Calculator":
         bmi = weight_kg / (height_m ** 2)
         st.success(f"Your BMI is **{bmi:.2f}**")
 
-        # Determine category and give tips
         if bmi < 18.5:
             st.info("🟦 Category: **Underweight**")
-            st.warning("⚠️ Your BMI is below normal.")
-            st.markdown("""
-            ### 🛠️ What You Can Do:
-            - 🍽️ Eat calorie-rich foods (nuts, bananas, dairy, rice)
-            - 🥩 Add protein (eggs, paneer, legumes)
-            - 🏋️‍♀️ Strength training helps build muscle
-            - 💤 Sleep well and rest
-            - 👨‍⚕️ See a doctor if it's sudden weight loss
-            """)
+            st.markdown("**Tips:** Eat high-calorie and protein-rich foods.")
         elif bmi < 24.9:
-            st.success("🟩 Category: **Normal weight**")
-            st.info("✅ Great! Your BMI is in the healthy range.")
-            st.markdown("""
-            ### 🛠️ What You Can Do:
-            - 🥗 Maintain a balanced diet
-            - 🏃‍♂️ Stay physically active
-            - 💧 Drink lots of water
-            - 💤 Sleep 7–9 hours a day
-            """)
+            st.success("🟩 Category: **Normal**")
+            st.markdown("**Tips:** Keep up a balanced diet and active lifestyle.")
         elif bmi < 29.9:
             st.warning("🟧 Category: **Overweight**")
-            st.warning("⚠️ Your BMI is slightly above normal.")
-            st.markdown("""
-            ### 🛠️ What You Can Do:
-            - 🍎 Eat more fruits, veggies, whole grains
-            - 🏃‍♀️ Exercise 30–60 mins daily
-            - 🚫 Reduce fried and sugary foods
-            - 🧘 Try stress-reducing activities like yoga
-            """)
+            st.markdown("**Tips:** Eat light, exercise more, reduce sugar.")
         else:
             st.error("🟥 Category: **Obese**")
-            st.error("❗ Your BMI is in the obese range. Action is needed.")
-            st.markdown("""
-            ### 🛠️ What You Can Do:
-            - 🥗 Follow a low-calorie, high-fiber diet
-            - 🏃‍♀️ Walk, swim, cycle regularly
-            - 🍽️ Avoid junk food and soda
-            - 🧠 Track meals using an app
-            - 👨‍⚕️ Visit a doctor or dietitian for guidance
-            """)
+            st.markdown("**Tips:** Follow a low-calorie diet and consult a doctor.")
 
-        # --- BMI Comparison Chart ---
         st.markdown("### 📊 BMI Category Comparison")
         categories = ["Underweight", "Normal", "Overweight", "Obese"]
         bmi_ranges = [18.4, 24.9, 29.9, 35]
@@ -183,13 +192,10 @@ elif page == "📊 BMI Calculator":
         ax.set_ylabel("BMI Value")
         ax.set_title("BMI Categories vs Your BMI")
         ax.legend()
-
         st.pyplot(fig)
 
-# Page: Endurance Estimator
 elif page == "🧬 Endurance Estimator":
     st.title("🧬 Endurance Estimator")
-    st.markdown("Estimate your endurance by answering a few questions:")
     q1 = st.slider("How long can you jog without stopping? (mins)", 1, 60, 10)
     q2 = st.slider("How many pushups can you do in one set?", 1, 100, 20)
     q3 = st.slider("How often do you exercise weekly?", 0, 7, 3)
@@ -197,7 +203,6 @@ elif page == "🧬 Endurance Estimator":
     endurance_score = round(est * 10, 1)
     st.success(f"Estimated Endurance Score: **{endurance_score}/10**")
 
-# Page: Aggression Scale
 elif page == "💢 Aggression Scale":
     st.title("💢 Aggression Assessment")
     q1 = st.slider("How often do you get angry easily?", 1, 10, 5)
@@ -206,7 +211,6 @@ elif page == "💢 Aggression Scale":
     aggression_score = round((q1 + q2 + q3) / 3, 1)
     st.success(f"Your Aggression Score: **{aggression_score}/10**")
 
-# Page: Diet Planner
 elif page == "🥗 Diet Planner":
     st.title("🥗 Custom Diet Planner")
     weight = st.number_input("Current Weight (kg)", 30, 200, 70)
@@ -214,43 +218,6 @@ elif page == "🥗 Diet Planner":
     preference = st.selectbox("Diet Type", ["Balanced", "High Protein", "Vegetarian", "Low Carb"])
 
     if st.button("Generate Plan"):
-        st.info("Generating personalized meal plan...")
+        st.info("Generating meal plan...")
         time.sleep(2)
-        if target < weight:
-            goal = "lose"
-        elif target > weight:
-            goal = "gain"
-        else:
-            goal = "maintain"
-
-        st.success(f"Based on your goal to **{goal} weight**, here is a suggested {preference.lower()} plan:")
-        if preference == "Balanced":
-            st.markdown("""
-            - 🥣 Breakfast: Oatmeal + banana + eggs
-            - 🥗 Lunch: Brown rice + grilled chicken + vegetables
-            - 🍽️ Dinner: Chapati + paneer + salad
-            - 🍎 Snacks: Fruits, yogurt
-            """)
-        elif preference == "High Protein":
-            st.markdown("""
-            - 🍳 Breakfast: Eggs + nuts + protein shake
-            - 🍛 Lunch: Quinoa + grilled tofu + lentils
-            - 🥩 Dinner: Chicken breast + sweet potato + veggies
-            - 🥜 Snacks: Greek yogurt, almonds
-            """)
-        elif preference == "Vegetarian":
-            st.markdown("""
-            - 🍞 Breakfast: Whole grain toast + avocado
-            - 🍛 Lunch: Veg pulao + raita + salad
-            - 🍲 Dinner: Dal + chapati + mixed veggies
-            - 🥛 Snacks: Buttermilk, fruits
-            """)
-        else:
-            st.markdown("""
-            - 🍳 Breakfast: Eggs + avocado
-            - 🥗 Lunch: Grilled chicken/fish + greens
-            - 🥘 Dinner: Paneer + sauteed spinach
-            - 🥜 Snacks: Nuts, cheese
-            """)
-
-        st.markdown("📥 To get this plan as a PDF or email export, please log in (optional). Coming soon!")
+        if
