@@ -82,6 +82,8 @@ page = st.sidebar.selectbox("Navigate", [
     "🏠 Home",
     "🎯 Zeitgeist AI",
     "📊 BMI Calculator",
+    "🧬 Endurance Estimator",
+    "💢 Aggression Scale",
     "🗓 Pro Plan"
 ])
 
@@ -127,10 +129,10 @@ elif page == "🎯 Zeitgeist AI":
 
             # Typing animation
             st.markdown("<h3>🏅 Recommended Sport:</h3>", unsafe_allow_html=True)
-            st.write("")
-            for word in f"{sport}".split():
-                st.markdown(f"**{word}** ", unsafe_allow_html=True)
-                time.sleep(0.2)
+            result_placeholder = st.empty()
+            for i in range(len(sport)):
+                result_placeholder.markdown(f"<h2><code>{sport[:i+1]}</code></h2>", unsafe_allow_html=True)
+                time.sleep(0.05)
 
             if medical_condition:
                 st.warning("⚠️ Note: Please consult a physician before engaging in physical activities with your medical condition.")
@@ -212,22 +214,29 @@ elif page == "📊 BMI Calculator":
         ax1.legend()
         st.pyplot(fig1)
 
-        st.markdown("### 🎯 BMI Gauge")
-        fig2, ax2 = plt.subplots(figsize=(5, 2))
-        ax2.axis("off")
-        labels = ["Underweight", "Normal", "Overweight", "Obese"]
-        values = [16.5, 21.7, 27.4, 32.5]
-        colors_gauge = ['skyblue', 'lightgreen', 'orange', 'red']
-        ax2.barh([0], [35], color="lightgray", height=0.3)
-        ax2.barh([0], [bmi], color="deepskyblue", height=0.3)
-        for i, v in enumerate(values):
-            ax2.text(v, 0.35, labels[i], ha='center', color=colors_gauge[i], fontsize=8)
-        ax2.set_xlim([10, 35])
-        st.pyplot(fig2)
-
         st.markdown("---")
         st.markdown("### 👥 Project By")
         st.markdown("**Samvit, Satyaki, Varyam, Manu Sharth, Aarnav Tripathi**")
+
+# Endurance Estimator
+elif page == "🧬 Endurance Estimator":
+    st.title("🧬 Endurance Estimator")
+    st.markdown("Estimate your endurance by answering a few questions:")
+    q1 = st.slider("How long can you jog without stopping? (mins)", 1, 60, 10)
+    q2 = st.slider("How many pushups can you do in one set?", 1, 100, 20)
+    q3 = st.slider("How often do you exercise weekly?", 0, 7, 3)
+    est = (q1/60)*0.4 + (q2/100)*0.3 + (q3/7)*0.3
+    endurance_score = round(est * 10, 1)
+    st.success(f"Estimated Endurance Score: **{endurance_score}/10**")
+
+# Aggression Scale
+elif page == "💢 Aggression Scale":
+    st.title("💢 Aggression Assessment")
+    q1 = st.slider("How often do you get angry easily?", 1, 10, 5)
+    q2 = st.slider("How likely are you to confront someone when annoyed?", 1, 10, 5)
+    q3 = st.slider("Do you enjoy competitive environments?", 1, 10, 5)
+    aggression_score = round((q1 + q2 + q3) / 3, 1)
+    st.success(f"Your Aggression Score: **{aggression_score}/10**")
 
 # Pro Plan
 elif page == "🗓 Pro Plan":
