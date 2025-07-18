@@ -63,6 +63,46 @@ def fast_type(text):
 # Load model
 model = joblib.load("sport_model.pkl")
 
+# Optional login system
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+user_db_file = "user_db.json"
+if not os.path.exists(user_db_file):
+    with open(user_db_file, "w") as f:
+        json.dump({}, f)
+with open(user_db_file, "r") as f:
+    user_db = json.load(f)
+
+with st.sidebar.expander("🔐 Login / Register (Optional)", expanded=False):
+    option = st.radio("Select Option", ["Login", "Register"])
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if option == "Register":
+        if st.button("Register"):
+            if username in user_db:
+                st.error("Username already exists.")
+            else:
+                user_db[username] = password
+                with open(user_db_file, "w") as f:
+                    json.dump(user_db, f)
+                st.success("Registration successful.")
+    else:
+        if st.button("Login"):
+            if username in user_db and user_db[username] == password:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success("Logged in successfully.")
+            else:
+                st.error("Invalid credentials.")
+
+if st.session_state.logged_in:
+    st.sidebar.markdown(f"✅ Logged in as: **{st.session_state.username}**")
+else:
+    st.sidebar.markdown("👤 Not logged in")
+
 # Sidebar
 page = st.sidebar.selectbox("Navigate", [
     "🏠 Home",
@@ -139,35 +179,37 @@ elif page == "📊 BMI Calculator":
     if st.button("Calculate BMI"):
         height_m = height_cm / 100
         bmi = weight_kg / (height_m ** 2)
-        st.success(f"Your BMI is **{bmi:.2f}**")
+        st.success(f"Your BMI is **{bmi:.2f} kg/m²**")
 
-        # Categories
         if bmi < 18.5:
             st.info("🟦 Underweight")
             st.warning("You are below the normal weight range.")
             st.markdown("""
+            **Justification:** Lower BMI can lead to fatigue and poor immunity.
             **Try:** High-protein diet, calorie surplus, resistance workouts.
             """)
         elif bmi < 24.9:
             st.success("🟩 Normal")
             st.info("Great job! You're in the healthy range.")
             st.markdown("""
+            **Justification:** Normal BMI is linked to lower risk of diseases.
             **Maintain:** Balanced diet, hydration, physical activity.
             """)
         elif bmi < 29.9:
             st.warning("🟧 Overweight")
             st.warning("You're slightly above normal BMI.")
             st.markdown("""
+            **Justification:** Higher BMI may increase chances of diabetes and heart issues.
             **Try:** Cardio workouts, reduce sugar/oil, increase fiber.
             """)
         else:
             st.error("🟥 Obese")
             st.error("You are in the obese BMI range.")
             st.markdown("""
+            **Justification:** Obesity increases risk for multiple chronic illnesses.
             **Try:** Consult a doctor, create a strict plan, cut junk food.
             """)
 
-        # Bar chart
         st.markdown("### 📊 BMI Category Chart")
         categories = ["Underweight", "Normal", "Overweight", "Obese"]
         values = [18.4, 24.9, 29.9, 35]
@@ -179,13 +221,12 @@ elif page == "📊 BMI Calculator":
         ax.legend()
         st.pyplot(fig)
 
-        # Gauge Chart
         st.markdown("### 🧭 BMI Gauge")
         fig, ax = plt.subplots(figsize=(6, 3))
         ax.axis('off')
-        ax.annotate(f'{bmi:.2f}', xy=(0.5, 0.6), ha='center', fontsize=24, color='white')
+        ax.annotate(f'{bmi:.2f} kg/m²', xy=(0.5, 0.6), ha='center', fontsize=24, color='white')
 
-        theta = (bmi / 40) * 180  # max 40 BMI = 180 deg
+        theta = (bmi / 40) * 180
         x = [0.5, 0.5 + 0.4 * np.cos(np.radians(180 - theta))]
         y = [0.6, 0.6 + 0.4 * np.sin(np.radians(180 - theta))]
         ax.annotate('', xy=(x[1], y[1]), xytext=(x[0], y[0]), arrowprops=dict(facecolor='blue', width=4, headwidth=8))
@@ -250,4 +291,3 @@ st.markdown("""
 #### 👨‍💻 Team Credits:
 **Samvit**, **Satyaki**, **Varyam**, **Manu Sharth**, **Aarnav Tripathi**
 """)
-
