@@ -289,5 +289,5 @@ elif page == "🧠 Pro Plan":
 st.markdown("""
 ---
 #### 👨‍💻 Team Credits:
-**Samvit**, **Satyaki**, **Varyam**, **Manu Sharth**, **Aarnav Tripathi**
+**Samvit(programming)**, **Satyaki**, **Varyam**, **Manu Sharth**, **Aarnav Tripathi**
 """)
