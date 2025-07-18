@@ -245,4 +245,9 @@ elif page == "🧠 Pro Plan":
         """)
 
 # CREDITS
-st.markdown(\"\"\"\n---\n#### 👨‍💻 Team Credits:\n**Samvit**, **Satyaki**, **Varyam**, **Manu Sharth**, **Aarnav Tripathi**\n\"\"\")
+st.markdown("""
+---
+#### 👨‍💻 Team Credits:
+**Samvit**, **Satyaki**, **Varyam**, **Manu Sharth**, **Aarnav Tripathi**
+""")
+
