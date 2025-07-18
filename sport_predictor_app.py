@@ -5,68 +5,35 @@ import time
 import os
 import json
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
-# Set custom page config
-st.set_page_config(page_title="Sport Predictor", layout="wide")
+# Set up page config
+st.set_page_config(page_title="Zeitgeist", layout="wide")
 
-# Neon gradient custom CSS styling
+# Apply custom CSS for aesthetics
 st.markdown("""
     <style>
-    /* Background Gradient */
-    body, .stApp {
-        background: linear-gradient(135deg, #1f8fff, #ff00c8, #6f00ff);
-        background-size: 600% 600%;
-        animation: gradientFlow 15s ease infinite;
-        color: white;
-    }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1f8fff, #6f00ff);
-        color: white;
-    }
-
-    /* Neon buttons */
-    .stButton>button {
-        background-color: #1f8fff !important;
-        color: white !important;
-        border-radius: 10px;
-        padding: 0.5em 1em;
-        font-weight: bold;
-        box-shadow: 0 0 10px #1f8fff;
-        transition: 0.3s ease;
-    }
-    .stButton>button:hover {
-        box-shadow: 0 0 20px #1f8fff;
-    }
-
-    @keyframes gradientFlow {
-        0%{background-position:0% 50%}
-        50%{background-position:100% 50%}
-        100%{background-position:0% 50%}
-    }
+        html, body, [class*="css"]  {
+            font-family: 'Times New Roman';
+            background: linear-gradient(to right, #1f8fff, #8e44ad);
+            color: white;
+        }
+        .sidebar .sidebar-content {
+            background: linear-gradient(to bottom, #1f8fff, #4b0082);
+        }
+        .stButton > button {
+            background-color: #1f8fff;
+            color: white;
+            border-radius: 8px;
+        }
+        h1, h2, h3, h4 {
+            font-weight: bold;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# Typing animation function
-def type_text(message, delay=0.02):
-    typed = ""
-    message_placeholder = st.empty()
-    for char in message:
-        typed += char
-        message_placeholder.markdown(f"**{typed}**")
-        time.sleep(delay)
-
 # Load model
 model = joblib.load("sport_model.pkl")
-
-# User DB
-user_db_file = "user_db.json"
-if not os.path.exists(user_db_file):
-    with open(user_db_file, "w") as f:
-        json.dump({}, f)
-with open(user_db_file, "r") as f:
-    user_db = json.load(f)
 
 # Session state
 if "logged_in" not in st.session_state:
@@ -74,28 +41,37 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
+# User DB setup
+user_db_file = "user_db.json"
+if not os.path.exists(user_db_file):
+    with open(user_db_file, "w") as f:
+        json.dump({}, f)
+with open(user_db_file, "r") as f:
+    user_db = json.load(f)
+
 # Sidebar Login/Register
 with st.sidebar.expander("🔐 Login / Register (Optional)", expanded=False):
     option = st.radio("Select Option", ["Login", "Register"])
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-    if option == "Register" and st.button("Register"):
-        if username in user_db:
-            st.error("Username already exists.")
-        else:
-            user_db[username] = password
-            with open(user_db_file, "w") as f:
-                json.dump(user_db, f)
-            st.success("Registered.")
-    elif option == "Login" and st.button("Login"):
-        if username in user_db and user_db[username] == password:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.success("Logged in.")
-        else:
-            st.error("Invalid credentials.")
+    if option == "Register":
+        if st.button("Register"):
+            if username in user_db:
+                st.error("Username already exists.")
+            else:
+                user_db[username] = password
+                with open(user_db_file, "w") as f:
+                    json.dump(user_db, f)
+                st.success("Registration successful.")
+    else:
+        if st.button("Login"):
+            if username in user_db and user_db[username] == password:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success("Logged in successfully.")
+            else:
+                st.error("Invalid credentials.")
 
-# Sidebar status
 if st.session_state.logged_in:
     st.sidebar.markdown(f"✅ Logged in as: **{st.session_state.username}**")
 else:
@@ -104,30 +80,22 @@ else:
 # Navigation
 page = st.sidebar.selectbox("Navigate", [
     "🏠 Home",
-    "🎯 Predictor.AI",
+    "🎯 Zeitgeist AI",
     "📊 BMI Calculator",
-    "🧬 Endurance Estimator",
-    "💢 Aggression Scale",
-    "🥗 Diet Planner"
+    "🗓 Pro Plan"
 ])
 
-# Home
+# Home Page
 if page == "🏠 Home":
-    st.title("🏠 Welcome to the Sport Recommender")
     st.markdown("""
-    This AI-powered app recommends the best sport for you based on your attributes.
+    <h1 style='text-align: center;'>Zeitgeist</h1>
+    <h3 style='text-align: center;'>The Ultimate AI Sport Recommender</h3>
+    <p style='text-align: center;'>AI-powered recommendations to find the sport that fits YOU best.</p>
+    """, unsafe_allow_html=True)
 
-    **Features:**
-    - 🎯 AI-based Sport Predictor
-    - 📊 BMI Calculator + Visual Chart
-    - 🧬 Endurance Estimator
-    - 💢 Aggression Analyzer
-    - 🥗 Custom Diet Plan Generator
-    """)
-
-# Predictor
-elif page == "🎯 Predictor.AI":
-    st.title("🎯 Sport Predictor")
+# Zeitgeist AI
+elif page == "🎯 Zeitgeist AI":
+    st.title("🎯 Zeitgeist AI")
 
     age = st.slider("Age", 10, 60, 25)
     gender = st.selectbox("Gender", ["Male", "Female"])
@@ -153,80 +121,143 @@ elif page == "🎯 Predictor.AI":
 
     if st.button("Predict Sport"):
         with st.spinner("Analyzing your profile..."):
-            time.sleep(1)
-            prediction = model.predict(input_df)[0]
-            type_text(f"🏅 Recommended Sport: **{prediction}**")
+            time.sleep(2)
+            prediction = model.predict(input_df)
+            sport = prediction[0]
+
+            # Typing animation
+            st.markdown("<h3>🏅 Recommended Sport:</h3>", unsafe_allow_html=True)
+            st.write("")
+            for word in f"{sport}".split():
+                st.markdown(f"**{word}** ", unsafe_allow_html=True)
+                time.sleep(0.2)
+
             if medical_condition:
-                st.warning("⚠️ Please consult a doctor before physical activity.")
+                st.warning("⚠️ Note: Please consult a physician before engaging in physical activities with your medical condition.")
+
+            # Short pro tips
+            st.markdown("""
+            ### 💡 Tips to Go Pro:
+            - 🏋️ Train daily with discipline
+            - 🧠 Study techniques and strategies
+            - 🎯 Participate in competitions
+            - 📚 Learn from top athletes
+            - 👨‍🏫 Get a coach/mentor
+            """)
 
 # BMI Calculator
 elif page == "📊 BMI Calculator":
     st.title("📊 BMI Calculator")
-    h = st.number_input("Height (cm)", 100, 250, 170)
-    w = st.number_input("Weight (kg)", 30, 200, 70)
+    height_cm = st.number_input("Enter your height (cm):", 100, 250, 170)
+    weight_kg = st.number_input("Enter your weight (kg):", 30, 200, 70)
 
     if st.button("Calculate BMI"):
-        h_m = h / 100
-        bmi = w / (h_m ** 2)
+        height_m = height_cm / 100
+        bmi = weight_kg / (height_m ** 2)
         st.success(f"Your BMI is **{bmi:.2f}**")
 
         if bmi < 18.5:
-            type_text("🟦 Category: Underweight")
-            st.markdown("- Eat more calories and protein\n- Strength training\n- Sleep well")
+            st.info("🟦 Category: **Underweight**")
+            st.warning("⚠️ Your BMI is below normal.")
+            st.markdown("**Justification:** Low BMI may result in nutrient deficiencies, fatigue, or a weakened immune system.")
+            st.markdown("""### 🛠️ What You Can Do:
+- 🍽️ Eat calorie-rich foods (nuts, bananas, dairy, rice)
+- 🥩 Add protein (eggs, paneer, legumes)
+- 🏋️‍♀️ Strength training helps build muscle
+- 💤 Sleep well and rest
+- 👨‍⚕️ See a doctor if it's sudden weight loss
+""")
         elif bmi < 24.9:
-            type_text("🟩 Category: Normal")
-            st.markdown("- Maintain a balanced diet\n- Keep active")
+            st.success("🟩 Category: **Normal weight**")
+            st.info("✅ Great! Your BMI is in the healthy range.")
+            st.markdown("**Justification:** Normal BMI lowers the risk of chronic diseases and supports physical performance.")
+            st.markdown("""### 🛠️ What You Can Do:
+- 🥗 Maintain a balanced diet
+- 🏃‍♂️ Stay physically active
+- 💧 Drink lots of water
+- 💤 Sleep 7–9 hours a day
+""")
         elif bmi < 29.9:
-            type_text("🟧 Category: Overweight")
-            st.markdown("- Eat more fruits & veggies\n- Daily exercise\n- Reduce sugar")
+            st.warning("🟧 Category: **Overweight**")
+            st.warning("⚠️ Your BMI is slightly above normal.")
+            st.markdown("**Justification:** Higher BMI increases risk of diabetes, joint issues, and hypertension.")
+            st.markdown("""### 🛠️ What You Can Do:
+- 🍎 Eat more fruits, veggies, whole grains
+- 🏃‍♀️ Exercise 30–60 mins daily
+- 🚫 Reduce fried and sugary foods
+- 🧘 Try stress-reducing activities like yoga
+""")
         else:
-            type_text("🟥 Category: Obese")
-            st.markdown("- Low-calorie diet\n- Regular activity\n- Visit a doctor")
+            st.error("🟥 Category: **Obese**")
+            st.error("❗ Your BMI is in the obese range. Action is needed.")
+            st.markdown("**Justification:** Obesity increases the risk of heart disease, stroke, and diabetes.")
+            st.markdown("""### 🛠️ What You Can Do:
+- 🥗 Follow a low-calorie, high-fiber diet
+- 🏃‍♀️ Walk, swim, cycle regularly
+- 🍽️ Avoid junk food and soda
+- 🧠 Track meals using an app
+- 👨‍⚕️ Visit a doctor or dietitian for guidance
+""")
 
-        st.markdown("### 📊 BMI Chart")
-        fig, ax = plt.subplots()
-        ax.bar(["Underweight", "Normal", "Overweight", "Obese"],
-               [18.4, 24.9, 29.9, 35],
-               color=['skyblue', 'green', 'orange', 'red'])
-        ax.axhline(bmi, color='blue', linestyle='--', label=f'Your BMI: {bmi:.2f}')
-        ax.legend()
-        st.pyplot(fig)
+        st.markdown("### 📊 BMI Category Comparison")
+        categories = ["Underweight", "Normal", "Overweight", "Obese"]
+        bmi_ranges = [18.4, 24.9, 29.9, 35]
+        colors = ['skyblue', 'lightgreen', 'orange', 'red']
 
-# Endurance
-elif page == "🧬 Endurance Estimator":
-    st.title("🧬 Endurance Estimator")
-    q1 = st.slider("Jog (mins)", 1, 60, 10)
-    q2 = st.slider("Pushups (1 set)", 1, 100, 20)
-    q3 = st.slider("Days active weekly", 0, 7, 3)
-    score = (q1/60)*0.4 + (q2/100)*0.3 + (q3/7)*0.3
-    type_text(f"🧪 Estimated Endurance Score: {round(score*10,1)}/10")
+        fig1, ax1 = plt.subplots()
+        ax1.bar(categories, bmi_ranges, color=colors)
+        ax1.axhline(bmi, color='blue', linestyle='--', label=f'Your BMI: {bmi:.2f}')
+        ax1.set_ylabel("BMI Value")
+        ax1.set_title("BMI Categories vs Your BMI")
+        ax1.legend()
+        st.pyplot(fig1)
 
-# Aggression
-elif page == "💢 Aggression Scale":
-    st.title("💢 Aggression Scale")
-    a1 = st.slider("Get angry easily?", 1, 10, 5)
-    a2 = st.slider("Confront when annoyed?", 1, 10, 5)
-    a3 = st.slider("Enjoy competition?", 1, 10, 5)
-    score = round((a1 + a2 + a3)/3, 1)
-    type_text(f"🔥 Aggression Score: {score}/10")
+        st.markdown("### 🎯 BMI Gauge")
+        fig2, ax2 = plt.subplots(figsize=(5, 2))
+        ax2.axis("off")
+        labels = ["Underweight", "Normal", "Overweight", "Obese"]
+        values = [16.5, 21.7, 27.4, 32.5]
+        colors_gauge = ['skyblue', 'lightgreen', 'orange', 'red']
+        ax2.barh([0], [35], color="lightgray", height=0.3)
+        ax2.barh([0], [bmi], color="deepskyblue", height=0.3)
+        for i, v in enumerate(values):
+            ax2.text(v, 0.35, labels[i], ha='center', color=colors_gauge[i], fontsize=8)
+        ax2.set_xlim([10, 35])
+        st.pyplot(fig2)
 
-# Diet
-elif page == "🥗 Diet Planner":
-    st.title("🥗 Diet Planner")
-    cw = st.number_input("Current Weight (kg)", 30, 200, 70)
-    tw = st.number_input("Target Weight (kg)", 30, 200, 65)
-    plan = st.selectbox("Diet Type", ["Balanced", "High Protein", "Vegetarian", "Low Carb"])
+        st.markdown("---")
+        st.markdown("### 👥 Project By")
+        st.markdown("**Samvit, Satyaki, Varyam, Manu Sharth, Aarnav Tripathi**")
 
-    if st.button("Generate Plan"):
-        time.sleep(1)
-        action = "gain" if tw > cw else "lose" if tw < cw else "maintain"
-        type_text(f"🎯 You want to {action} weight. Here's a {plan.lower()} diet:")
+# Pro Plan
+elif page == "🗓 Pro Plan":
+    st.title("🗓 Personalized Pro Plan")
+    time_available = st.selectbox("How much time can you spare per day?", ["30 mins", "1 hour", "2+ hours"])
 
-        if plan == "Balanced":
-            st.markdown("- 🥣 Oats + banana + eggs\n- 🍛 Rice + chicken + salad\n- 🍽️ Chapati + paneer")
-        elif plan == "High Protein":
-            st.markdown("- 🍳 Eggs + shake + nuts\n- 🍛 Quinoa + lentils\n- 🥩 Chicken + veggies")
-        elif plan == "Vegetarian":
-            st.markdown("- 🍞 Toast + avocado\n- 🍛 Veg pulao + raita\n- 🍲 Dal + roti")
+    if st.button("Generate My Plan"):
+        if time_available == "30 mins":
+            st.markdown("""
+            ### 📘 30-Minute Daily Plan:
+            - 10 mins: Warm-up and stretching
+            - 10 mins: Skill practice
+            - 10 mins: Cool-down and video analysis
+            - 🧠 Tip: Use this for consistency and habit-building
+            """)
+        elif time_available == "1 hour":
+            st.markdown("""
+            ### 📗 1-Hour Daily Plan:
+            - 15 mins: Warm-up + cardio
+            - 20 mins: Sport-specific drills
+            - 15 mins: Strength training
+            - 10 mins: Stretch + recovery
+            - ✅ Add weekend match play
+            """)
         else:
-            st.markdown("- 🍳 Eggs + avocado\n- 🥗 Chicken/fish + salad\n- 🧀 Paneer + spinach")
+            st.markdown("""
+            ### 📕 Intensive 2+ Hours Plan:
+            - 30 mins: Conditioning & strength
+            - 45 mins: Drills + tactical gameplay
+            - 30 mins: Match simulation + review
+            - 15 mins: Cool-down, rehab, mental prep
+            - 🔁 Weekly progress tracking
+            """)
